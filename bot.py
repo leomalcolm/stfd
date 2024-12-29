@@ -29,13 +29,23 @@ async def check_for_updates():
             # Parse the HTML content
             soup = BeautifulSoup(response.content, 'html.parser')
 
-            # Find the pairing data (we assume the pairings are within <pre> tags, adjust as needed)
-            pairings_section = soup.find_all('pre')
+            # Find the pairing data (adjust based on structure of the page)
+            # Assuming pairings are inside a <pre> tag, but you may need to inspect the page structure
+            pairings_section = soup.find_all('table', {'class': 'table'})  # Adjust the class name if necessary
 
             if pairings_section:
-                # Get the text content of the pairings (this might need adjustment)
-                pairings = pairings_section[0].get_text(strip=True)
-                
+                # Extract the rows from the table (adjust if table structure is different)
+                pairings = ""
+                for table in pairings_section:
+                    rows = table.find_all('tr')
+                    for row in rows[1:]:  # Skip header row
+                        cols = row.find_all('td')
+                        # Adjust column indexes if needed
+                        if len(cols) > 1:
+                            player1 = cols[0].get_text(strip=True)
+                            player2 = cols[1].get_text(strip=True)
+                            pairings += f"{player1} vs {player2}\n"
+
                 # Check if the pairings have changed
                 if pairings != last_pairings:
                     # If new pairings are detected, update the stored pairings and notify on Discord
