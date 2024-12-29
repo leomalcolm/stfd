@@ -51,13 +51,13 @@ async def check_for_updates():
                             board = cols[0].get_text(strip=True)
                             white = cols[2].get_text(strip=True)
                             black = cols[8].get_text(strip=True)
-                            pairings += f"**{board}** {white} *vs* {black}\n"
+                            pairings += f"{board} **{white}** *vs* **{black}**\n"
 
                 # Check if the pairings have changed
                 if pairings != last_pairings:
                     # If new pairings are detected, update the stored pairings and notify on Discord
                     last_pairings = pairings
-                    new_pairing_message = f"{intro_message}\n{pairings}"
+                    new_pairing_message = f":bangbang: **{intro_message} @championship :bangbang:\n\n{pairings}**"
 
                     # Send the message to Discord
                     channel = client.get_channel(int(CHANNEL_ID))
