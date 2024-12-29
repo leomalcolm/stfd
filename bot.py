@@ -12,7 +12,7 @@ intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 
 # Define the Vega URL for checking pairings
-VEGA_URL = "https://newzealandchess.co.nz/tournaments/misc/2024/www2024%20New%20Zealand%20Championship/pairs9.html"
+VEGA_URL = "https://newzealandchess.co.nz/tournaments/misc/2024/www2024%20New%20Zealand%20Championship/pairs8.html"
 
 # Store the last set of pairings to avoid redundant notifications
 last_pairings = ""
