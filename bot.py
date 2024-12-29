@@ -57,7 +57,7 @@ async def check_for_updates():
                 if pairings != last_pairings:
                     # If new pairings are detected, update the stored pairings and notify on Discord
                     last_pairings = pairings
-                    new_pairing_message = f":bangbang: **{intro_message} @championship :bangbang:\n\n{pairings}**"
+                    new_pairing_message = f":bangbang: **{intro_message}** @championship :bangbang:\n\n{pairings}"
 
                     # Send the message to Discord
                     channel = client.get_channel(int(CHANNEL_ID))
