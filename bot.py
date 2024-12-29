@@ -29,8 +29,14 @@ async def check_for_updates():
             # Parse the HTML content
             soup = BeautifulSoup(response.content, 'html.parser')
 
+            # Find the first <h2> and <h4> tags to use in the message
+            h2_text = soup.find('h2').get_text(strip=True) if soup.find('h2') else ""
+            h4_text = soup.find('h4').get_text(strip=True) if soup.find('h4') else ""
+
+            # Combine the h2 and h4 texts for the message intro
+            intro_message = f"{h2_text} - {h4_text}" if h2_text and h4_text else "New round pairings are available:"
+
             # Find the pairing data (adjust based on structure of the page)
-            # Assuming pairings are inside a <table> tag with a specific class (update if necessary)
             pairings_section = soup.find_all('table', {'class': 'table'})  # Adjust class if needed
 
             if pairings_section:
@@ -45,13 +51,13 @@ async def check_for_updates():
                             board = cols[0].get_text(strip=True)
                             white = cols[2].get_text(strip=True)
                             black = cols[8].get_text(strip=True)
-                            pairings += f"{board} **{white}** *vs* **{black}**\n"
+                            pairings += f"**{board}** {white} *vs* {black}\n"
 
                 # Check if the pairings have changed
                 if pairings != last_pairings:
                     # If new pairings are detected, update the stored pairings and notify on Discord
                     last_pairings = pairings
-                    new_pairing_message = "New round pairings are available:\n" + pairings
+                    new_pairing_message = f"{intro_message}\n{pairings}"
 
                     # Send the message to Discord
                     channel = client.get_channel(int(CHANNEL_ID))
