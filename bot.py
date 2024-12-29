@@ -9,7 +9,6 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 CHANNEL_ID = 1323029319160954941
 CHA = 1322881877333508118
 MESSAGE_ID = 1323043964361900123  # The specific message ID to monitor for reactions
-ROLE_NAME = "championship"  # Role to assign
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -82,29 +81,31 @@ async def on_ready():
         await check_for_updates()
         await asyncio.sleep(60)
 
-# Event handler for reactions added
 @client.event
 async def on_raw_reaction_add(payload):
-    if payload.message_id == MESSAGE_ID and str(payload.emoji) == "\ud83c\udfc6":  # Trophy emoji
+    if payload.message_id == MESSAGE_ID and str(payload.emoji) == "🏆":
         guild = client.get_guild(payload.guild_id)
         if guild:
-            role = discord.utils.get(guild.roles, name=ROLE_NAME)
+            role = guild.get_role(CHA)  # Fetch role by ID
             member = guild.get_member(payload.user_id)
             if role and member:
                 await member.add_roles(role)
                 print(f"Assigned {role.name} to {member.name}")
+            else:
+                print(f"Role or member not found. Role: {role}, Member: {member}")
 
-# Event handler for reactions removed
 @client.event
 async def on_raw_reaction_remove(payload):
-    if payload.message_id == MESSAGE_ID and str(payload.emoji) == "\ud83c\udfc6":  # Trophy emoji
+    if payload.message_id == MESSAGE_ID and str(payload.emoji) == "🏆":
         guild = client.get_guild(payload.guild_id)
         if guild:
-            role = discord.utils.get(guild.roles, name=ROLE_NAME)
+            role = guild.get_role(CHA)  # Fetch role by ID
             member = guild.get_member(payload.user_id)
             if role and member:
                 await member.remove_roles(role)
                 print(f"Removed {role.name} from {member.name}")
+            else:
+                print(f"Role or member not found. Role: {role}, Member: {member}")
 
 # Run the bot
 client.run(TOKEN)
