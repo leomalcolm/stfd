@@ -43,13 +43,9 @@ async def check_for_updates():
                         # Adjust column indexes if needed
                         if len(cols) > 1:
                             board = cols[0].get_text(strip=True)
-                            whiteName = cols[2].get_text(strip=True)
-                            whiteScore = cols[3].get_text(strip=True)
-                            whiteSeed = cols[4].get_text(strip=True)
-                            blackSeed = cols[6].get_text(strip=True)
-                            blackScore = cols[7].get_text(strip=True)
-                            blackName = cols[7].get_text(strip=True)
-                            pairings += f"{board} {whiteName} {whiteScore} {whiteSeed} vs {blackSeed} {blackScore} {blackName}\n"
+                            white = cols[2].get_text(strip=True)
+                            black = cols[8].get_text(strip=True)
+                            pairings += f"{board} **{white}** *vs* **{black}**\n"
 
                 # Check if the pairings have changed
                 if pairings != last_pairings:
