@@ -4,11 +4,23 @@ from bs4 import BeautifulSoup
 import asyncio
 import os
 
-# Your bot token and channel ID
 TOKEN = os.getenv('DISCORD_TOKEN')
 CHANNEL_ID = 1323029319160954941
-CHA = 1322881877333508118
-MESSAGE_ID = 1323043964361900123  # The specific message ID to monitor for reactions
+MESSAGE_ID = 1323043964361900123
+
+CHAMPIONSHIP = 1322881877333508118
+MAJOR_OPEN = 1323073564261351475
+JUNIOR = 1323073745157623919
+RAPID = 1323073911541465130
+BLITZ = 1323074042550554735
+
+ROLE_EMOJI_MAPPING = {
+    "🏆": CHAMPIONSHIP,
+    "🥇": MAJOR_OPEN,
+    "👶": JUNIOR,
+    "🔥": RAPID,
+    "⚡": BLITZ
+}
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -32,61 +44,51 @@ async def check_for_updates():
         response = requests.get(VEGA_URL)
 
         if response.status_code == 200:
-            # Parse the HTML content
             soup = BeautifulSoup(response.content, 'html.parser')
 
-            # Find the first <h2> and <h4> tags to use in the message
             h2_text = soup.find('h2').get_text(strip=True) if soup.find('h2') else ""
             h4_text = soup.find('h4').get_text(strip=True) if soup.find('h4') else ""
 
-            # Combine the h2 and h4 texts for the message intro
             intro_message = f"{h2_text} - {h4_text}" if h2_text and h4_text else "New round pairings are available:"
 
-            # Find the pairing data (adjust based on structure of the page)
-            pairings_section = soup.find_all('table', {'class': 'table'})  # Adjust class if needed
+            pairings_section = soup.find_all('table', {'class': 'table'})
 
             if pairings_section:
-                # Extract the rows from the table
                 pairings = ""
                 for table in pairings_section:
                     rows = table.find_all('tr')
-                    for row in rows[1:]:  # Skip header row
+                    for row in rows[1:]:
                         cols = row.find_all('td')
-                        # Adjust column indexes if needed
                         if len(cols) > 1:
                             board = cols[0].get_text(strip=True)
                             white = cols[2].get_text(strip=True)
                             black = cols[8].get_text(strip=True)
                             pairings += f"{board} **{white}** *vs* **{black}**\n"
 
-                # Check if the pairings have changed
                 if pairings != last_pairings:
-                    # If new pairings are detected, update the stored pairings and notify on Discord
                     last_pairings = pairings
-                    new_pairing_message = f":bangbang: **{intro_message}** <@&{CHA}> :bangbang:\n\n{pairings}"
+                    new_pairing_message = f":bangbang: **{intro_message}** <@&{CHAMPIONSHIP}> :bangbang:\n\n{pairings}"
 
-                    # Send the message to Discord
                     channel = client.get_channel(int(CHANNEL_ID))
                     await channel.send(new_pairing_message)
 
     except Exception as e:
         print(f"Error fetching updates: {e}")
 
-# When the bot is ready, start checking for updates
 @client.event
 async def on_ready():
     print(f'Logged in as {client.user}')
-    # Check every 60 seconds (adjust as needed)
     while True:
         await check_for_updates()
         await asyncio.sleep(60)
 
 @client.event
 async def on_raw_reaction_add(payload):
-    if payload.message_id == MESSAGE_ID and str(payload.emoji) == "🏆":
-        guild = client.get_guild(payload.guild_id)
-        if guild:
-            role = guild.get_role(CHA)  # Fetch role by ID
+    guild = client.get_guild(payload.guild_id)
+    if guild:
+        role_id = ROLE_EMOJI_MAPPING.get(str(payload.emoji))
+        if role_id:
+            role = guild.get_role(role_id)
             member = guild.get_member(payload.user_id)
             if role and member:
                 await member.add_roles(role)
@@ -96,10 +98,11 @@ async def on_raw_reaction_add(payload):
 
 @client.event
 async def on_raw_reaction_remove(payload):
-    if payload.message_id == MESSAGE_ID and str(payload.emoji) == "🏆":
-        guild = client.get_guild(payload.guild_id)
-        if guild:
-            role = guild.get_role(CHA)  # Fetch role by ID
+    guild = client.get_guild(payload.guild_id)
+    if guild:
+        role_id = ROLE_EMOJI_MAPPING.get(str(payload.emoji))
+        if role_id:
+            role = guild.get_role(role_id)
             member = guild.get_member(payload.user_id)
             if role and member:
                 await member.remove_roles(role)
@@ -107,5 +110,4 @@ async def on_raw_reaction_remove(payload):
             else:
                 print(f"Role or member not found. Role: {role}, Member: {member}")
 
-# Run the bot
 client.run(TOKEN)
