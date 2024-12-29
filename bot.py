@@ -6,14 +6,14 @@ import os
 
 # Your bot token and channel ID
 TOKEN = os.getenv('DISCORD_TOKEN')
-CHANNEL_ID = os.getenv('DISCORD_CHANNEL_ID')
+CHANNEL_ID = 1323029319160954941
 CHA = 1322881877333508118
 
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 
 # Define the Vega URL for checking pairings
-VEGA_URL = "https://newzealandchess.co.nz/tournaments/misc/2024/www2024%20New%20Zealand%20Championship/pairs8.html"
+VEGA_URL = "https://redfrogdude.com/"
 
 # Store the last set of pairings to avoid redundant notifications
 last_pairings = ""
