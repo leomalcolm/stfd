@@ -30,24 +30,28 @@ intents.guilds = True
 intents.members = True
 client = discord.Client(intents=intents)
 
-VEGA_URL = "https://redfrogdude.com/"
-
 PAIRINGS_FILE = "last_pairings.json"
 
 def load_last_pairings():
     if os.path.exists(PAIRINGS_FILE):
         with open(PAIRINGS_FILE, 'r') as f:
             return json.load(f)
-    return ""
+    return ""  # Return empty string if no file exists
 
 def save_last_pairings(pairings):
     with open(PAIRINGS_FILE, 'w') as f:
         json.dump(pairings, f)
 
+VEGA_URL = "https://redfrogdude.com/"
+
+# Initialize last_pairings from file
 last_pairings = load_last_pairings()
 
+# Flag to indicate if it's the first check after startup
+is_first_check = True
+
 async def check_for_updates():
-    global last_pairings
+    global last_pairings, is_first_check
 
     try:
         # Send a GET request to the page
@@ -80,10 +84,15 @@ async def check_for_updates():
                     save_last_pairings(pairings)
                     last_pairings = pairings
 
-                    new_pairing_message = f":bangbang: **{intro_message}** <@&{CHAMPIONSHIP}> :bangbang:\n\n{pairings}"
+                    # Only send message after the first check
+                    if not is_first_check:
+                        new_pairing_message = f":bangbang: **{intro_message}** <@&{CHAMPIONSHIP}> :bangbang:\n\n{pairings}"
+                        channel = client.get_channel(int(CHANNEL_ID))
+                        await channel.send(new_pairing_message)
 
-                    channel = client.get_channel(int(CHANNEL_ID))
-                    await channel.send(new_pairing_message)
+                # Set flag to False after the first check to allow message sending
+                if is_first_check:
+                    is_first_check = False
 
     except Exception as e:
         print(f"Error fetching updates: {e}")
