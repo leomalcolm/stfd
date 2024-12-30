@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import asyncio
 import os
+import json
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 CHANNEL_ID = 1323029319160954941
@@ -29,13 +30,22 @@ intents.guilds = True
 intents.members = True
 client = discord.Client(intents=intents)
 
-# Define the Vega URL for checking pairings
 VEGA_URL = "https://redfrogdude.com/"
 
-# Store the last set of pairings to avoid redundant notifications
-last_pairings = ""
+PAIRINGS_FILE = "last_pairings.json"
 
-# Function to check for updates
+def load_last_pairings():
+    if os.path.exists(PAIRINGS_FILE):
+        with open(PAIRINGS_FILE, 'r') as f:
+            return json.load(f)
+    return ""
+
+def save_last_pairings(pairings):
+    with open(PAIRINGS_FILE, 'w') as f:
+        json.dump(pairings, f)
+
+last_pairings = load_last_pairings()
+
 async def check_for_updates():
     global last_pairings
 
@@ -66,7 +76,10 @@ async def check_for_updates():
                             pairings += f"{board} **{white}** *vs* **{black}**\n"
 
                 if pairings != last_pairings:
+                    # Save pairings to persistent storage
+                    save_last_pairings(pairings)
                     last_pairings = pairings
+
                     new_pairing_message = f":bangbang: **{intro_message}** <@&{CHAMPIONSHIP}> :bangbang:\n\n{pairings}"
 
                     channel = client.get_channel(int(CHANNEL_ID))
