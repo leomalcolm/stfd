@@ -3,7 +3,6 @@ import requests
 from bs4 import BeautifulSoup
 import asyncio
 import os
-import json
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 CHANNEL_ID = 1323029319160954941
@@ -23,6 +22,15 @@ ROLE_EMOJI_MAPPING = {
     "⚡": BLITZ
 }
 
+# Tournament-specific URLs
+TOURNAMENT_URLS = {
+    "CHAMPIONSHIP": "https://redfrogdude.com/",
+    "MAJOR_OPEN": "https://redfrogdude.com/",
+    "JUNIOR": "https://redfrogdude.com/",
+    "RAPID": "https://redfrogdude.com/",
+    "BLITZ": "https://redfrogdude.com/"
+}
+
 intents = discord.Intents.default()
 intents.messages = True
 intents.reactions = True
@@ -30,22 +38,14 @@ intents.guilds = True
 intents.members = True
 client = discord.Client(intents=intents)
 
-PAIRINGS_FILE = "last_pairings.json"
-
-def load_last_pairings():
-    if os.path.exists(PAIRINGS_FILE):
-        with open(PAIRINGS_FILE, 'r') as f:
-            return json.load(f)
-    return ""  # Return empty string if no file exists
-
-def save_last_pairings(pairings):
-    with open(PAIRINGS_FILE, 'w') as f:
-        json.dump(pairings, f)
-
-VEGA_URL = "https://redfrogdude.com/"
-
-# Initialize last_pairings from file
-last_pairings = load_last_pairings()
+# Store pairings in variables (initial load)
+last_pairings = {
+    "CHAMPIONSHIP": "",
+    "MAJOR_OPEN": "",
+    "JUNIOR": "",
+    "RAPID": "",
+    "BLITZ": ""
+}
 
 # Flag to indicate if it's the first check after startup
 is_first_check = True
@@ -54,41 +54,54 @@ async def check_for_updates():
     global last_pairings, is_first_check
 
     try:
-        # Send a GET request to the page
-        response = requests.get(VEGA_URL)
+        # Iterate over each tournament and check for updates
+        for tournament, url in TOURNAMENT_URLS.items():
+            response = requests.get(url)
 
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.content, 'html.parser')
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, 'html.parser')
 
-            h2_text = soup.find('h2').get_text(strip=True) if soup.find('h2') else ""
-            h4_text = soup.find('h4').get_text(strip=True) if soup.find('h4') else ""
+                h2_text = soup.find('h2').get_text(strip=True) if soup.find('h2') else ""
+                h4_text = soup.find('h4').get_text(strip=True) if soup.find('h4') else ""
 
-            intro_message = f"{h2_text} - {h4_text}" if h2_text and h4_text else "New round pairings are available:"
+                intro_message = f"{h2_text} - {h4_text}" if h2_text and h4_text else "New round pairings are available:"
 
-            pairings_section = soup.find_all('table', {'class': 'table'})
+                pairings_section = soup.find_all('table', {'class': 'table'})
 
-            if pairings_section:
-                pairings = ""
-                for table in pairings_section:
-                    rows = table.find_all('tr')
-                    for row in rows[1:]:
-                        cols = row.find_all('td')
-                        if len(cols) > 1:
-                            board = cols[0].get_text(strip=True)
-                            white = cols[2].get_text(strip=True)
-                            black = cols[8].get_text(strip=True)
-                            pairings += f"{board} **{white}** *vs* **{black}**\n"
+                if pairings_section:
+                    pairings = ""
+                    for table in pairings_section:
+                        rows = table.find_all('tr')
+                        for row in rows[1:]:
+                            cols = row.find_all('td')
+                            if len(cols) > 1:
+                                board = cols[0].get_text(strip=True)
+                                white = cols[2].get_text(strip=True)
+                                black = cols[8].get_text(strip=True)
+                                pairings += f"{board} **{white}** *vs* **{black}**\n"
 
-                if pairings != last_pairings:
-                    # Save pairings to persistent storage
-                    save_last_pairings(pairings)
-                    last_pairings = pairings
+                    # Check if the pairings have changed
+                    if pairings != last_pairings[tournament]:
+                        last_pairings[tournament] = pairings  # Update pairings for the tournament
 
-                    # Only send message after the first check
-                    if not is_first_check:
-                        new_pairing_message = f":bangbang: **{intro_message}** <@&{CHAMPIONSHIP}> :bangbang:\n\n{pairings}"
-                        channel = client.get_channel(int(CHANNEL_ID))
-                        await channel.send(new_pairing_message)
+                        # Only send message after the first check
+                        if not is_first_check:
+                            tournament_channel = None
+                            if tournament == "CHAMPIONSHIP":
+                                tournament_channel = CHAMPIONSHIP
+                            elif tournament == "MAJOR_OPEN":
+                                tournament_channel = MAJOR_OPEN
+                            elif tournament == "JUNIOR":
+                                tournament_channel = JUNIOR
+                            elif tournament == "RAPID":
+                                tournament_channel = RAPID
+                            elif tournament == "BLITZ":
+                                tournament_channel = BLITZ
+
+                            if tournament_channel:
+                                new_pairing_message = f":bangbang: **{intro_message}** <@&{tournament_channel}> :bangbang:\n\n{pairings}"
+                                channel = client.get_channel(int(CHANNEL_ID))
+                                await channel.send(new_pairing_message)
 
                 # Set flag to False after the first check to allow message sending
                 if is_first_check:
