@@ -84,7 +84,7 @@ async def check_for_updates():
                         last_pairings[tournament] = pairings  # Update pairings for the tournament
 
                         # Prepare the full message
-                        new_pairing_message = f":bangbang: **{intro_message} {role_ping}** :bangbang:\n\n{pairings}"
+                        new_pairing_message = f":bangbang: **{intro_message} {role_ping}** :bangbang:\n\n"
 
                         # Send the message to the same channel
                         channel = client.get_channel(int(CHANNEL_ID))
@@ -92,7 +92,7 @@ async def check_for_updates():
                         # Split the message at row boundaries
                         rows = pairings.split("\n")
                         chunks = []
-                        current_chunk = ""
+                        current_chunk = new_pairing_message
 
                         for row in rows:
                             if len(current_chunk) + len(row) + 1 > 2000:  # +1 for newline character
