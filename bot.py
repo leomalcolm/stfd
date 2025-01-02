@@ -5,7 +5,7 @@ import asyncio
 import os
 
 TOKEN = os.getenv('DISCORD_TOKEN')
-CHANNEL_ID = 1185784461674151950
+CHANNEL_ID = 1324489271348039763
 MESSAGE_ID = 1324274216983593031
 
 CHAMPIONSHIP = 1322881877333508118
@@ -17,18 +17,14 @@ BLITZ = 1323074042550554735
 ROLE_EMOJI_MAPPING = {
     "🏆": CHAMPIONSHIP,
     "🥇": MAJOR_OPEN,
-    "👶": JUNIOR,
-    "🔥": RAPID,
-    "⚡": BLITZ
+    "👶": JUNIOR
 }
 
 # Tournament-specific URLs
 TOURNAMENT_URLS = {
     "CHAMPIONSHIP": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressNZChampionship2025/wwwCongressNZChampionship2025/pairs3.html",
     "MAJOR_OPEN": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressMajorOpen2025/wwwCongressMajorOpen2025/pairs3.html",
-    "JUNIOR": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressJunior2025/wwwCongressJunior2025/pairs1.html",
-    "RAPID": "https://redfrogdude.com/",
-    "BLITZ": "https://redfrogdude.com/"
+    "JUNIOR": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressJunior2025/wwwCongressJunior2025/pairs1.html"
 }
 
 intents = discord.Intents.default()
@@ -42,9 +38,7 @@ client = discord.Client(intents=intents)
 last_pairings = {
     "CHAMPIONSHIP": "",
     "MAJOR_OPEN": "",
-    "JUNIOR": "",
-    "RAPID": "",
-    "BLITZ": ""
+    "JUNIOR": ""
 }
 
 # Flag to indicate if it's the first check after startup
@@ -80,28 +74,23 @@ async def check_for_updates():
                                 black = cols[9].get_text(strip=True)
                                 pairings += f"{board} **{white}** *vs* **{black}**\n"
 
-                    # Check if the pairings have changed
                     if pairings != last_pairings[tournament]:
                         last_pairings[tournament] = pairings  # Update pairings for the tournament
 
-                        # Only send message after the first check
-                        if not is_first_check:
-                            tournament_channel = None
-                            if tournament == "CHAMPIONSHIP":
-                                tournament_channel = CHAMPIONSHIP
-                            elif tournament == "MAJOR_OPEN":
-                                tournament_channel = MAJOR_OPEN
-                            elif tournament == "JUNIOR":
-                                tournament_channel = JUNIOR
-                            elif tournament == "RAPID":
-                                tournament_channel = RAPID
-                            elif tournament == "BLITZ":
-                                tournament_channel = BLITZ
+                        # Prepare the full message
+                        new_pairing_message = f":bangbang: **{intro_message}** :bangbang:\n\n{pairings}"
+                        
+                        # Send the message to the same channel
+                        channel = client.get_channel(int(CHANNEL_ID))
+                        
+                        # Check message length and split if necessary
+                        if len(new_pairing_message) > 2000:
+                            chunks = [new_pairing_message[i:i+2000] for i in range(0, len(new_pairing_message), 2000)]
+                            for chunk in chunks:
+                                await channel.send(chunk)
+                        else:
+                            await channel.send(new_pairing_message)
 
-                            if tournament_channel:
-                                new_pairing_message = f":bangbang: **{intro_message}** <@&{tournament_channel}> :bangbang:\n\n{pairings}"
-                                channel = client.get_channel(int(CHANNEL_ID))
-                                await channel.send(new_pairing_message)
 
                 # Set flag to False after the first check to allow message sending
                 if is_first_check:
