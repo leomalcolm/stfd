@@ -5,7 +5,7 @@ import asyncio
 import os
 
 TOKEN = os.getenv('DISCORD_TOKEN')
-CHANNEL_ID = 1185784461674151950
+CHANNEL_ID = 1324334645940191293
 MESSAGE_ID = 1324274216983593031
 
 CHAMPIONSHIP = 1322881877333508118
@@ -144,5 +144,29 @@ async def on_raw_reaction_remove(payload):
                 print(f"Removed {role.name} from {member.name}")
             else:
                 print(f"Role or member not found. Role: {role}, Member: {member}")
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return  # Ignore messages from the bot itself
+
+    # Map commands to tournaments
+    command_mapping = {
+        "!c": "CHAMPIONSHIP",
+        "!m": "MAJOR_OPEN",
+        "!j": "JUNIOR",
+        "!r": "RAPID",
+        "!b": "BLITZ"
+    }
+
+    # Check if the message content matches any command
+    if message.content.lower() in command_mapping:
+        tournament = command_mapping[message.content.lower()]
+        pairings = last_pairings.get(tournament, "No pairings available at the moment.")
+        
+        # Compose and send the response message
+        response_message = f":chess_pawn: **Pairings for {tournament.replace('_', ' ').title()}** :chess_pawn:\n\n{pairings}"
+        await message.channel.send(response_message)
+
 
 client.run(TOKEN)
