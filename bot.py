@@ -11,8 +11,6 @@ MESSAGE_ID = 1324274216983593031
 CHAMPIONSHIP = 1322881877333508118
 MAJOR_OPEN = 1323073564261351475
 JUNIOR = 1323073745157623919
-RAPID = 1323073911541465130
-BLITZ = 1323074042550554735
 
 ROLE_EMOJI_MAPPING = {
     "🏆": CHAMPIONSHIP,
@@ -59,6 +57,14 @@ async def check_for_updates():
                 h4_text = soup.find('h4').get_text(strip=True) if soup.find('h4') else ""
 
                 intro_message = f"{h2_text} - {h4_text}" if h2_text and h4_text else "New round pairings are available:"
+                
+                # Ping the role for the current tournament
+                role_id = {
+                    "CHAMPIONSHIP": CHAMPIONSHIP,
+                    "MAJOR_OPEN": MAJOR_OPEN,
+                    "JUNIOR": JUNIOR
+                }.get(tournament, None)
+                role_ping = f"<@&{role_id}>" if role_id else ""
 
                 pairings_section = soup.find_all('table', {'class': 'table'})
 
@@ -78,19 +84,29 @@ async def check_for_updates():
                         last_pairings[tournament] = pairings  # Update pairings for the tournament
 
                         # Prepare the full message
-                        new_pairing_message = f":bangbang: **{intro_message}** :bangbang:\n\n{pairings}"
-                        
+                        new_pairing_message = f":bangbang: **{intro_message} {role_ping}** :bangbang:\n\n{pairings}"
+
                         # Send the message to the same channel
                         channel = client.get_channel(int(CHANNEL_ID))
                         
-                        # Check message length and split if necessary
-                        if len(new_pairing_message) > 2000:
-                            chunks = [new_pairing_message[i:i+2000] for i in range(0, len(new_pairing_message), 2000)]
-                            for chunk in chunks:
-                                await channel.send(chunk)
-                        else:
-                            await channel.send(new_pairing_message)
+                        # Split the message at row boundaries
+                        rows = pairings.split("\n")
+                        chunks = []
+                        current_chunk = ""
 
+                        for row in rows:
+                            if len(current_chunk) + len(row) + 1 > 2000:  # +1 for newline character
+                                chunks.append(current_chunk)
+                                current_chunk = row + "\n"
+                            else:
+                                current_chunk += row + "\n"
+
+                        if current_chunk:  # Add remaining rows to the last chunk
+                            chunks.append(current_chunk)
+
+                        # Send the chunks
+                        for chunk in chunks:
+                            await channel.send(chunk)
 
                 # Set flag to False after the first check to allow message sending
                 if is_first_check:
