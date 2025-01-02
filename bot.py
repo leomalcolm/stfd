@@ -5,8 +5,8 @@ import asyncio
 import os
 
 TOKEN = os.getenv('DISCORD_TOKEN')
-CHANNEL_ID = 1323029319160954941
-MESSAGE_ID = 1323043964361900123
+CHANNEL_ID = 1185784461674151950
+MESSAGE_ID = 1324274216983593031
 
 CHAMPIONSHIP = 1322881877333508118
 MAJOR_OPEN = 1323073564261351475
@@ -24,8 +24,8 @@ ROLE_EMOJI_MAPPING = {
 
 # Tournament-specific URLs
 TOURNAMENT_URLS = {
-    "CHAMPIONSHIP": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressNZChampionship2025/wwwCongressNZChampionship2025/pairs1.html",
-    "MAJOR_OPEN": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressMajorOpen2025/wwwCongressMajorOpen2025/pairs1.html",
+    "CHAMPIONSHIP": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressNZChampionship2025/wwwCongressNZChampionship2025/pairs3.html",
+    "MAJOR_OPEN": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressMajorOpen2025/wwwCongressMajorOpen2025/pairs3.html",
     "JUNIOR": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressJunior2025/wwwCongressJunior2025/pairs1.html",
     "RAPID": "https://redfrogdude.com/",
     "BLITZ": "https://redfrogdude.com/"
@@ -76,8 +76,8 @@ async def check_for_updates():
                             cols = row.find_all('td')
                             if len(cols) > 1:
                                 board = cols[0].get_text(strip=True)
-                                white = cols[2].get_text(strip=True)
-                                black = cols[8].get_text(strip=True)
+                                white = cols[3].get_text(strip=True)
+                                black = cols[9].get_text(strip=True)
                                 pairings += f"{board} **{white}** *vs* **{black}**\n"
 
                     # Check if the pairings have changed
