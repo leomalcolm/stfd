@@ -5,7 +5,7 @@ import asyncio
 import os
 
 TOKEN = os.getenv('DISCORD_TOKEN')
-CHANNEL_ID = 1324489271348039763
+CHANNEL_ID = 1185784461674151950
 MESSAGE_ID = 1324274216983593031
 
 CHAMPIONSHIP = 1322881877333508118
@@ -83,30 +83,31 @@ async def check_for_updates():
                     if pairings != last_pairings[tournament]:
                         last_pairings[tournament] = pairings  # Update pairings for the tournament
 
-                        # Prepare the full message
-                        new_pairing_message = f":bangbang: **{intro_message} {role_ping}** :bangbang:\n\n"
+                        if not is_first_check:    
+                            # Prepare the full message
+                            new_pairing_message = f":bangbang: **{intro_message} {role_ping}** :bangbang:\n\n"
 
-                        # Send the message to the same channel
-                        channel = client.get_channel(int(CHANNEL_ID))
-                        
-                        # Split the message at row boundaries
-                        rows = pairings.split("\n")
-                        chunks = []
-                        current_chunk = new_pairing_message
+                            # Send the message to the same channel
+                            channel = client.get_channel(int(CHANNEL_ID))
+                            
+                            # Split the message at row boundaries
+                            rows = pairings.split("\n")
+                            chunks = []
+                            current_chunk = new_pairing_message
 
-                        for row in rows:
-                            if len(current_chunk) + len(row) + 1 > 2000:  # +1 for newline character
+                            for row in rows:
+                                if len(current_chunk) + len(row) + 1 > 2000:  # +1 for newline character
+                                    chunks.append(current_chunk)
+                                    current_chunk = row + "\n"
+                                else:
+                                    current_chunk += row + "\n"
+
+                            if current_chunk:  # Add remaining rows to the last chunk
                                 chunks.append(current_chunk)
-                                current_chunk = row + "\n"
-                            else:
-                                current_chunk += row + "\n"
 
-                        if current_chunk:  # Add remaining rows to the last chunk
-                            chunks.append(current_chunk)
-
-                        # Send the chunks
-                        for chunk in chunks:
-                            await channel.send(chunk)
+                            # Send the chunks
+                            for chunk in chunks:
+                                await channel.send(chunk)
 
                 # Set flag to False after the first check to allow message sending
                 if is_first_check:
