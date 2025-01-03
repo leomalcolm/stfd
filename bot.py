@@ -20,9 +20,9 @@ ROLE_EMOJI_MAPPING = {
 
 # Tournament-specific URLs
 TOURNAMENT_URLS = {
-    "CHAMPIONSHIP": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressNZChampionship2025/wwwCongressNZChampionship2025/pairs3.html",
-    "MAJOR_OPEN": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressMajorOpen2025/wwwCongressMajorOpen2025/pairs3.html",
-    "JUNIOR": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressJunior2025/wwwCongressJunior2025/pairs1.html"
+    "CHAMPIONSHIP": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressNZChampionship2025/wwwCongressNZChampionship2025/pairs4.html",
+    "MAJOR_OPEN": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressMajorOpen2025/wwwCongressMajorOpen2025/pairs4.html",
+    "JUNIOR": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressJunior2025/wwwCongressJunior2025/pairs3.html"
 }
 
 intents = discord.Intents.default()
