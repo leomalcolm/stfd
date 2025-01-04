@@ -10,19 +10,16 @@ MESSAGE_ID = 1324274216983593031
 
 CHAMPIONSHIP = 1322881877333508118
 MAJOR_OPEN = 1323073564261351475
-JUNIOR = 1323073745157623919
 
 ROLE_EMOJI_MAPPING = {
     "🏆": CHAMPIONSHIP,
-    "🥇": MAJOR_OPEN,
-    "👶": JUNIOR
+    "🥇": MAJOR_OPEN
 }
 
 # Tournament-specific URLs
 TOURNAMENT_URLS = {
-    "CHAMPIONSHIP": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressNZChampionship2025/wwwCongressNZChampionship2025/pairs4.html",
-    "MAJOR_OPEN": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressMajorOpen2025/wwwCongressMajorOpen2025/pairs4.html",
-    "JUNIOR": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressJunior2025/wwwCongressJunior2025/pairs3.html"
+    "CHAMPIONSHIP": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressNZChampionship2025/wwwCongressNZChampionship2025/pairs5.html",
+    "MAJOR_OPEN": "https://newzealandchess.co.nz/tournaments/ch/2025/CongressMajorOpen2025/wwwCongressMajorOpen2025/pairs5.html"
 }
 
 intents = discord.Intents.default()
@@ -35,8 +32,7 @@ client = discord.Client(intents=intents)
 # Store pairings in variables (initial load)
 last_pairings = {
     "CHAMPIONSHIP": "",
-    "MAJOR_OPEN": "",
-    "JUNIOR": ""
+    "MAJOR_OPEN": ""
 }
 
 # Flag to indicate if it's the first check after startup
@@ -61,8 +57,7 @@ async def check_for_updates():
                 # Ping the role for the current tournament
                 role_id = {
                     "CHAMPIONSHIP": CHAMPIONSHIP,
-                    "MAJOR_OPEN": MAJOR_OPEN,
-                    "JUNIOR": JUNIOR
+                    "MAJOR_OPEN": MAJOR_OPEN
                 }.get(tournament, None)
                 role_ping = f"<@&{role_id}>" if role_id else ""
 
